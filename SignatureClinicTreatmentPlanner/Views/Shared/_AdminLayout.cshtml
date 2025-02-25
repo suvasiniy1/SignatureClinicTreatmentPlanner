@@ -1,0 +1,368 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>Admin</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+    @*  <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">     *@
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+    <link href="https://unpkg.com/gijgo@1.9.14/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css" />
+    <link href="~/content/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/content/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/content/css/style.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link href="~/js/jquery.multiselect.css" rel="stylesheet" />
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+
+    <style>
+        .top-right-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+
+        .profile-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .custom-icon {
+            font-size: 1.4rem !important; /* Adjust size as needed */
+            margin-right: 10px; /* Add spacing between icon and text */
+        }
+
+        /* Ensure all sidebar icons have the same size */
+        .sidebar-nav .nav-item i {
+            font-size: 1.4rem !important;
+        }
+        /* Ensure it is above other elements */
+    </style>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/content/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/gijgo@1.9.14/js/gijgo.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="~/js/jquery.multiselect.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#success-alert").hide();
+
+        });
+        function showAlert() {
+            $("#success-alert").fadeTo(2000, 500).slideUp(500, function () {
+                $("#success-alert").slideUp(500);
+            });
+        }
+    </script>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.1.1/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- ======= Header ======= -->
+    <header id="header" class="header fixed-top d-flex align-items-center">
+
+        <div class="d-flex align-items-center justify-content-between">
+            <a href="@Url.Action("Index", "Admin", new { admin = "Admin" })" class="logo d-flex align-items-center">
+                <img src="~/images/logo.jpeg" class="admin-logo" />
+                <span class="admin-text d-none d-lg-block">Admin</span>
+            </a>
+            <i class="bi bi-list toggle-sidebar-btn"></i>
+        </div>
+
+        @*  <div class="search-bar">
+            <form class="search-form d-flex align-items-center" method="POST" action="#">
+                <input type="text" name="query" placeholder="Search" title="Enter search keyword">
+                <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+            </form>
+        </div> *@
+
+        <nav class="header-nav ms-auto">
+            <ul class="d-flex align-items-center">
+
+                <li class="nav-item d-block d-lg-none">
+                    <a class="nav-link nav-icon search-bar-toggle " href="#">
+                        <i class="bi bi-search"></i>
+                    </a>
+                </li><!-- End Search Icon-->
+
+                <li class="nav-item dropdown pe-3">
+
+                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+                        <div class="row justify-content-center">
+                            <div class="col-auto">
+                                <div class="profile-circle">
+                                    @ViewBag.UserInitials
+                                </div>
+                            </div>
+                        </div>
+
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                        <li class="dropdown-header">
+                            <h6>@ViewBag.FullName</h6>
+                            @*  <span>Web Designer</span> *@
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
+                                <i class="bi bi-person"></i>
+                                <span>My Profile</span>
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
+                                <i class="bi bi-gear"></i>
+                                <span>Account Settings</span>
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="pages-faq.html">
+                                <i class="bi bi-question-circle"></i>
+                                <span>Need Help?</span>
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="/Login/Index">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Sign Out</span>
+                            </a>
+                        </li>
+
+                    </ul><!-- End Profile Dropdown Items -->
+                </li><!-- End Profile Nav -->
+
+            </ul>
+        </nav><!-- End Icons Navigation -->
+
+    </header><!-- End Header -->
+    <!-- ======= Sidebar ======= -->
+    <aside id="sidebar" class="sidebar">
+
+        <ul class="sidebar-nav" id="sidebar-nav">
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="@Url.Action("Dashboard", "Admin", new { admin = "Admin" })">
+                    <i class="bi bi-grid"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li><!-- End Dashboard Nav -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" data-bs-target="#add-nav" data-bs-toggle="collapse" href="#">
+                    <i class="bi bi-journal-text"></i><span> Add Settings</span><i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul id="add-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Clinic")">
+                            <i class="bi bi-hospital custom-icon"></i>
+                            <span>Clinics</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Treatment")">
+                            <i class="bi bi-file-medical custom-icon"></i>
+                            <span>Add Treatment</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Surgeon")">
+                            <i class="bi bi-person-check custom-icon"></i>
+                            <span>Add Surgeon</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" data-bs-target="#manage-user-nav" data-bs-toggle="collapse" href="#">
+                    <i class="bi bi-people"></i><span> Manage Users</span><i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul id="manage-user-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "ManageUser")">
+                            <i class="bi bi-person-lines-fill custom-icon"></i>
+                            <span>User List</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" data-bs-target="#Report-nav" data-bs-toggle="collapse" href="#">
+                    <i class="bi bi-bar-chart"></i><span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul id="Report-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                    <li class="nav-item">
+                        <a id="generatereportPageLink" href='#' class="nav-link collapsed">
+                            <span>Generate</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+
+        </ul>
+
+    </aside><!-- End Sidebar-->
+
+    <div class="alert alert-success alert-dismissible fade show top-right-alert" role="alert" id="success-alert">
+        <strong>Success!</strong> This alert will close automatically.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <main id="main" class="main">
+        <div class="col py-3" id="mainContent">
+            @RenderBody()
+
+            @RenderSection("Scripts", required: false)
+        </div>
+
+    </main><!-- End #main -->
+    <!-- ======= Footer ======= -->
+    <footer id="footer" class="footer">
+        <div class="copyright">
+            &copy; Copyright <strong><span>Y1 Capital</span></strong>. All Rights Reserved
+        </div>
+        <div class="credits">
+        </div>
+    </footer><!-- End Footer -->
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+
+
+
+    <!-- Template Main JS File -->
+
+    <script>
+
+        var idleTime = 0;
+
+        $(document).ready(function () {
+            //Increment the idle time counter every minute.
+            var idleInterval = setInterval(timerIncrement, 60000); // 1 minute
+
+            //Zero the idle timer on mouse movement.
+            $(this).mousemove(function (e) {
+                idleTime = 0;
+            });
+            $(this).keypress(function (e) {
+                idleTime = 0;
+            });
+            // Handle form submission for Create User
+            $('#createUserForm').submit(function (event) {
+
+                event.preventDefault(); // Prevent the form from submitting the traditional way
+                $.ajax({
+                    type: 'POST',
+                    url: $(this).attr('action'),
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        $('#mainContent').html(response); // Insert the response into the main content area
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error: ' + error);
+                    }
+                });
+            });
+
+        });
+
+        function timerIncrement() {
+            idleTime = idleTime + 1;
+            if (idleTime > 9) { // 10 minutes
+                window.location.href = '/Login/Index'; // Redirect to logout path
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            //Remove the style attributes.
+            $(".navbar-nav li, .navbar-nav a, .navbar-nav ul").removeAttr('style');
+
+            //Apply the Bootstrap class to the Submenu.
+            $(".dropdown-menu").closest("li").removeClass().addClass("dropdown-toggle");
+
+            //Apply the Bootstrap properties to the Submenu.
+            $(".dropdown-toggle").find("a").eq(0).attr("data-toggle", "dropdown").attr("aria-haspopup", "true").attr("aria-expanded", "false").append("<span class='caret'></span>");
+
+            //Apply the Bootstrap "active" class to the selected Menu item.
+            $("a.selected").closest("li").addClass("active");
+            $("a.selected").closest(".dropdown-toggle").addClass("active");
+        });
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+
+    </script>
+
+
+</body>
+
+</html>

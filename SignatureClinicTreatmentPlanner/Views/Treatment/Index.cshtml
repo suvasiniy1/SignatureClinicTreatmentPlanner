@@ -1,0 +1,315 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Ensure it uses the correct layout
+}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- DataTables CSS & JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<h4>Treatment Management</h4>
+<hr />
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <button type="button" id="addNewTreatmentBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#treatmentModal">
+                Add New Treatment
+            </button>
+        </div>
+        <div class="col-md-6 text-end">
+            <input id="txtTreatmentName" type="text" placeholder="Search..." class="form-control d-inline-block w-auto" />
+            <button id="btnClear" type="button" class="btn btn-outline-warning">Clear</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered w-100" id="tblTreatment">
+                <thead>
+                    <tr>
+                        <th>Treatment Name</th>
+                        <th>Assigned Surgeon</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- Custom dropdown for 'Show entries' -->
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <label>
+                Show
+                <select id="entriesSelect" class="form-select d-inline-block w-auto">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select> entries
+            </label>
+        </div>
+        <div class="col-md-6 text-end">
+            <div id="paginationContainer"></div> <!-- This will hold the pagination -->
+        </div>
+    </div>
+</div>
+
+<!-- Treatment Modal -->
+<div class="modal fade" id="treatmentModal" tabindex="-1" aria-labelledby="treatmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="treatmentModalLabel">Add/Edit Treatment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="treatmentForm">
+                    <input type="hidden" id="TreatmentId">
+                    <div class="form-group">
+                        <label>Treatment Name</label>
+                        <input type="text" id="TreatmentName" class="form-control" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Assign Surgeon</label>
+                        <select id="SurgeonDropdown" class="form-select">
+                            <option value="">Select Surgeon</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="SaveTreatmentBtn" class="btn btn-primary" onclick="SaveTreatment()">Save Treatment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+        $(document).ready(function () {
+        LoadTreatmentData();
+        LoadSurgeons();
+
+        // Custom search functionality
+        $("#btnClear").click(function () {
+            $("#txtTreatmentName").val('');
+            $("#tblTreatment").DataTable().search('').draw();
+        });
+
+        $("#txtTreatmentName").on("keyup", function () {
+            $("#tblTreatment").DataTable().search(this.value).draw();
+        });
+
+        $("#entriesSelect").on("change", function () {
+            $("#tblTreatment").DataTable().page.len($(this).val()).draw();
+        });
+
+        // ✅ Handle Add New Treatment Button Click
+        $("#addNewTreatmentBtn").click(function () {
+            $("#TreatmentId").val("");  // ✅ Reset hidden field
+            $("#TreatmentName").val("");  // ✅ Clear treatment name
+            $("#SurgeonDropdown").prop("disabled", false); // ✅ Enable dropdown
+            $("#SurgeonDropdown").val(""); // ✅ Reset surgeon selection
+            $("#SaveTreatmentBtn").text("Save Treatment"); // ✅ Change button text
+            LoadSurgeons();
+            $("#treatmentModal").modal("show"); // ✅ Open modal
+        });
+    });
+
+            function EditTreatment(id) {
+    $.get("/Treatment/GetTreatment/" + id, function (data) {
+        console.log("Edit Treatment Response:", data);  // ✅ Debugging output
+
+        if (!data || !data.treatmentID) {
+            alert("Error: Treatment data not found.");
+            return;
+        }
+
+        $("#TreatmentId").val(data.treatmentID);  // ✅ Set hidden ID
+        $("#TreatmentName").val(data.treatmentName);  // ✅ Set treatment name
+
+        $("#SurgeonDropdown").prop("disabled", true);  // ✅ Disable surgeon selection for editing
+        $("#SaveTreatmentBtn").text("Update Treatment");  // ✅ Change button text
+
+        // ✅ Fetch and bind assigned surgeons
+        $.ajax({
+            url: "/Treatment/GetSurgeonsByTreatment",
+            type: "GET",
+            data: { treatmentId: id },
+            success: function (response) {
+                console.log("Surgeons for Treatment:", response);  // ✅ Debugging output
+
+                $("#SurgeonDropdown").empty().append('<option value="">Select Surgeon</option>');
+
+                if (response.data.length > 0) {  // ✅ Ensure data key is used
+                    $.each(response.data, function (index, surgeon) {
+                        $("#SurgeonDropdown").append(
+                            `<option value="${surgeon.surgeonID}" selected>${surgeon.surgeonName}</option>`
+                        );
+                    });
+                } else {
+                    $("#SurgeonDropdown").append('<option value="">No Surgeon Assigned</option>');
+                }
+            },
+            error: function () {
+                console.error("Error fetching surgeons.");
+            }
+        });
+
+        $("#treatmentModal").modal("show");  // ✅ Open modal
+    }).fail(function () {
+        alert("Error fetching treatment details.");
+    });
+}
+
+
+
+               function LoadTreatmentData() {
+        if ($.fn.DataTable.isDataTable("#tblTreatment")) {
+            $("#tblTreatment").DataTable().destroy();
+        }
+
+        $.ajax({
+            url: "/Treatment/GetTreatments",
+            type: "GET",
+            datatype: "json",
+            success: function (data) {
+                console.log("API Response:", data);  // Debug: Check if data is received
+                var table = $("#tblTreatment").DataTable({
+                    "processing": true,
+                    "serverSide": false,
+                    "searching": true,
+                    "paging": true,
+                    "pageLength": 10,
+                    "dom": "rtip",
+                    "data": data.data,  // ✅ Assign data directly
+                    "columns": [
+                        { "data": "treatmentName", "width": "50%" },
+                        {
+                            "data": "assignedSurgeons",
+                            "title": "Assigned Surgeons",
+                            "render": function (data) {
+                                return Array.isArray(data) && data.length > 0 ? data.join(", ") : "No Surgeon Assigned";
+                            },
+                            "width": "30%"
+                        },
+                        {
+                            "data": "treatmentID",
+                            "title": "Actions",
+                            "render": function (data, type, row) {
+                                return `
+                                    <button class="btn btn-warning btn-sm" onclick="EditTreatment(${data})">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="DeleteTreatment(${data})">Delete</button>
+                                `;
+                            },
+                            "width": "20%"
+                        }
+                    ],
+                    "language": { "emptyTable": "No treatments available" }
+                });
+
+                // ✅ Move Pagination to Correct Place
+                        $("#paginationContainer").html($("#tblTreatment_paginate"));
+                   
+            },
+            error: function () {
+                console.error("Error fetching treatments.");
+            }
+        });
+    }
+
+
+
+       function LoadSurgeons() {
+        $.ajax({
+            url: "/Treatment/GetSurgeons",
+            type: "GET",
+            success: function (response) {
+                console.log("Surgeons received:", response);  // ✅ Debugging output
+
+                $("#SurgeonDropdown").empty().append('<option value="">Select Surgeon</option>');
+
+                $.each(response.data, function (index, surgeon) {  // ✅ Ensure "data" is used
+                    $("#SurgeonDropdown").append(`<option value="${surgeon.surgeonID}">${surgeon.surgeonName}</option>`);
+                });
+            },
+            error: function () {
+                console.error("Error fetching surgeons.");
+            }
+        });
+    }
+    
+
+                function SaveTreatment() {
+        var treatmentId = $("#TreatmentId").val();
+        var treatmentName = $("#TreatmentName").val();
+        var surgeonId = $("#SurgeonDropdown").val();
+
+        if (!treatmentName || (!treatmentId && !surgeonId)) {
+            alert("Please enter a treatment name and select a surgeon.");
+            return;
+        }
+
+        if (treatmentId) { // ✅ Update Existing Treatment (without changing surgeon)
+            $.ajax({
+                url: "/Treatment/UpdateTreatment",
+                type: "POST",
+                data: { treatmentId: treatmentId, treatmentName: treatmentName },
+                success: function (response) {
+                    if (response.success) {
+                        $("#treatmentModal").modal("hide");
+                        alert(response.message);
+                        LoadTreatmentData(); // ✅ Refresh table
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert("Error while updating treatment.");
+                }
+            });
+        } else { // ✅ Create New Treatment
+            $.ajax({
+                url: "/Treatment/CreateTreatment",
+                type: "POST",
+                data: { treatmentName: treatmentName, surgeonId: surgeonId },
+                success: function (response) {
+                    if (response.success) {
+                        $("#treatmentModal").modal("hide");
+                        alert(response.message);
+                        LoadTreatmentData(); // ✅ Refresh table
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert("Error while adding treatment.");
+                }
+            });
+        }
+    }
+
+    // function EditTreatment(id) {
+    //     $.get("/Treatment/GetTreatment/" + id, function (data) {
+    //         $("#TreatmentId").val(data.treatmentId);
+    //         $("#TreatmentName").val(data.treatmentName);
+    //         $("#SurgeonDropdown").val(data.surgeonId);
+    //         $("#treatmentModal").modal('show');
+    //     });
+    // }
+
+    function DeleteTreatment(id) {
+        if (confirm("Are you sure you want to delete this treatment?")) {
+            $.post("/Treatment/RemoveTreatment", { id: id }, function (response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    LoadTreatmentData();
+                } else {
+                    toastr.error(response.message);
+                }
+            });
+        }
+    }
+</script>

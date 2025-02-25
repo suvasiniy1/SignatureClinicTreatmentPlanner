@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Treatment Form</title>
+
+    <!-- Bootstrap & jQuery -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* NAVIGATION BAR */
+        .navbar {
+            background-color: #343a40; /* Dark Background */
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            height: 50px; /* Adjusted for proper visibility */
+        }
+
+        .navbar-brand {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .separator {
+            margin: 0 12px;
+            color: white;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+            .logout-btn:hover {
+                color: #ff4d4d; /* Red on Hover */
+            }
+
+        /* Welcome & Username Styling */
+        .welcome-text {
+            color: white; /* Welcome in White */
+            font-weight: bold;
+        }
+
+        .username-text {
+            color: #0d6efd; /* Blue Username */
+            font-weight: bold;
+        }
+
+        /* FORM CONTAINER */
+        .form-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <img src="/images/logo.jpeg" alt="Signature Clinic Logo" class="logo">
+            <span class="navbar-brand">Patient Treatment Form</span>
+        </div>
+        <div class="user-info">
+            <i class="fas fa-user text-white"></i>
+            <span class="welcome-text">Welcome,</span>
+            <span class="username-text">@ViewBag.UserName</span>
+            <span class="separator">|</span>
+            <a href="/Login/Index" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Log Out
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+
+            <!-- Form Section Wrapped in a Box -->
+            <div class="form-container">
+                <form method="post" action="/Patient/Create">
+                    <div class="mb-3">
+                        <label class="form-label">First Name:</label>
+                        <input type="text" class="form-control" name="FirstName" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email:</label>
+                        <input type="email" class="form-control" name="Email" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Treatment Date & Time:</label>
+                        <input type="datetime-local" class="form-control" name="Dates" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Price:</label>
+                        <input type="number" class="form-control" name="Price" required />
+                    </div>
+
+                    <!-- Treatment Dropdown -->
+                    <div class="mb-3">
+                        <label class="form-label">Treatment:</label>
+                        <select class="form-select" name="Treatment" id="Treatment">
+                            <option value="">Select Treatment</option>
+                            @foreach (var treatment in ViewBag.Treatments)
+                            {
+                                <option value="@treatment.TreatmentID">@treatment.TreatmentName</option>
+                            }
+                        </select>
+                    </div>
+                    <!-- Surgeon Dropdown -->
+                    <div class="mb-3">
+                        <label class="form-label">Surgeon:</label>
+                        <select class="form-select" name="SurgeonID" id="SurgeonDropdown">
+                            <option value="">Select Surgeon</option>
+                        </select>
+                    </div>
+
+                   @*  <!-- Surgeon Selection -->
+                    <div class="mb-3">
+                        <label class="form-label">Surgeon(s):</label>
+                        <div id="SurgeonsContainer" class="form-control" style="overflow-y: auto; max-height: 200px;">
+                            <div>
+                                <input type="checkbox" id="selectAllSurgeons" /> Select All
+                            </div>
+                        </div>
+                    
+                    </div> *@
+
+                    <!-- Clinic Dropdown -->
+                    <div class="mb-3">
+                        <label class="form-label">Clinic:</label>
+                        <select class="form-select" name="Clinic" id="Clinic">
+                            <option value="">Select Clinic</option>
+                        </select>
+                    </div>
+
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Generate PDF & Send Email</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery & Script Placement at the Bottom -->
+    <script>
+        $(document).ready(function () {
+            // Fetch surgeons when a treatment is selected
+            $('#Treatment').change(function () {
+                var treatmentID = $(this).val(); // Get selected treatment ID
+                if (treatmentID) {
+                    $.ajax({
+                        url: '/Patient/GetSurgeonsByTreatment', // API Endpoint
+                        data: { treatmentID: treatmentID },
+                        success: function (surgeons) {
+                            $('#SurgeonDropdown').empty();
+                            $('#SurgeonDropdown').append('<option value="">Select Surgeon</option>'); // Default option
+
+                            if (surgeons.length > 0) {
+                                $.each(surgeons, function (index, surgeon) {
+                                    $('#SurgeonDropdown').append(
+                                        `<option value="${surgeon.surgeonID}">${surgeon.surgeonName}</option>`
+                                    );
+                                });
+                            }
+                        },
+                        error: function () {
+                            console.error("Error fetching surgeons.");
+                        }
+                    });
+                }
+            });
+
+            // Fetch clinics when a surgeon is selected
+                $('#SurgeonDropdown').change(function () {
+            var selectedSurgeonID = $('#SurgeonDropdown').val(); // Get selected surgeon ID
+
+            if (selectedSurgeonID) {
+                $.ajax({
+                    url: '/Patient/GetClinicsBySurgeon', // Update endpoint to match method name
+                    data: { surgeonID: selectedSurgeonID },  // Send as an integer
+                    success: function (clinics) {
+                        console.log("Clinics received:", clinics); // Debugging output
+
+                        $('#Clinic').empty();
+                        $('#Clinic').append('<option value="">Select Clinic</option>'); // Default option
+
+                        $.each(clinics, function (index, clinic) {
+                            console.log("Appending:", clinic); // Debugging log
+                            $('#Clinic').append(
+                                `<option value="${clinic.ClinicID}">${clinic.ClinicName}</option>` // Use correct property names
+                            );
+                        });
+                    },
+                    error: function () {
+                        console.error("Error fetching clinics.");
+                    }
+                });
+            }
+        });
+
+
+        }); // End of document.ready
+    </script>
+
+</body>
+</html>

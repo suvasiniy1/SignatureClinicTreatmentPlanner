@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Plan</title>
+    <style>
+        body {
+            font-family: 'Proxima Nova', Arial, sans-serif;
+            margin: 40px;
+            padding: 0;
+            color: #221E1F;
+            font-size: 14px;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Header (Logo) */
+        .header {
+            width: 100%;
+            text-align: right;
+            display: flex;
+            justify-content: flex-end;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            right: -70px;
+        }
+
+            .header img {
+                max-width: 280px;
+                height: auto;
+                display: block;
+            }
+
+        /* Content Section */
+        .content {
+            padding: 10px 60px;
+            flex: 1;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: normal;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            margin-top: 50px; /* Adjusted to move the title down */
+        }
+
+        /* Ensure all text aligns correctly */
+        .text-section {
+            margin-bottom: 10px;
+            text-align: left; /* Ensures consistency */
+        }
+
+        /* Table for Proper Alignment */
+        .details {
+            display: table;
+            width: 100%;
+            margin-top: 10px;
+            border-spacing: 0px 2px; /* Adjusting vertical gap between fields */
+        }
+
+            .details p {
+                display: table-row;
+                margin-bottom: 0px; /* Remove extra margin */
+            }
+
+            .details span {
+                display: table-cell;
+                padding: 2px 10px; /* Ensure consistent spacing */
+                vertical-align: middle;
+            }
+
+                .details span:first-child {
+                    width: 150px;
+                    padding-left: 0;
+                }
+
+        .label {
+            text-align: left;
+            font-weight: bold;
+            width: 150px;
+        }
+
+        .value {
+            text-align: left;
+        }
+
+        .footer {
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #333; /* Dark gray text color */
+            padding: 10px;
+            margin-top: auto;
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            right: 0;
+            font-weight: bold;
+            font-family: Proxima Nova; /* Common sans-serif font */
+        }
+
+            .footer p {
+                margin: 1px 0;
+            }
+
+        /* Bolded Final Text */
+        .follow-up-text {
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: left; /* Ensure alignment matches */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Logo (Header) -->
+    <div class="header">
+        <img src="images/header.PNG" alt="Signature Clinic Logo">
+    </div>
+
+    <!-- Content Section -->
+    <div class="content">
+        <div class="title">TREATMENT PLAN</div>
+
+        <p class="text-section">Hi <span class="highlight">##USERNAME##</span>,</p>
+        <p class="text-section">Thank you for attending your consultation with Signature Clinic. We hope that all of your questions were answered.</p>
+
+        <p class="text-section">Below are the details of your consultation and the procedure:</p>
+
+        <div class="details">
+            <table style="border: 0; border-collapse: collapse;">
+                <tr>
+                    <th style="width:200px; text-align: left;">Procedure:</th>
+                    <td style="padding-left:30px; text-align: left;">##TREATMENT##</td>
+                </tr>
+                <tr>
+                    <th style="width:200px; text-align: left;">Price:</th>
+                    <td style="padding-left:30px; text-align: left;">$##AMOUNT##</td>
+                </tr>
+                <tr>
+                    <th style="width:200px; text-align: left;">Treatment DATE&TIME:</th>
+                    <td style="padding-left:30px; text-align: left;">##Treatment DATE&TIME##</td>
+                </tr>
+                <tr>
+                    <th style="width:200px; text-align: left;">Surgeon:</th>
+                    <td style="padding-left:30px; text-align: left;">##SURGEON##</td>
+                </tr>
+                <tr>
+                    <th style="width:200px; text-align: left;">Clinic:</th>
+                    <td style="padding-left:30px; text-align: left;">##CLINIC##</td>
+                </tr>
+
+            </table>
+        </div>
+
+        <!-- Final Message -->
+        <p class="follow-up-text">You are receiving this email in follow-up to your consultation with our Doctor.</p>
+    </div>
+
+    <!-- Footer (Copyright only) -->
+    <div class="footer">
+        <p>Copyright (C) 2024 Signature Clinic. All rights reserved.</p>
+        <p>Signature Medical Limited. Company Number: SC607129. Address: 272 Bath Street, Glasgow G2 4JR</p>
+    </div>
+
+</body>
+</html>
