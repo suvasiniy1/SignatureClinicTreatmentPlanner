@@ -78,15 +78,20 @@ namespace SignatureClinicTreatmentPlanner.Controllers
             return Json(user);
         }
 
-        // Create a new user
         [HttpPost]
         public async Task<IActionResult> Create(User model)
         {
+            if (string.IsNullOrEmpty(model.FirstName) || string.IsNullOrEmpty(model.LastName))
+            {
+                return Json(new { success = false, message = "First Name and Last Name are required." });
+            }
+
             if (!ModelState.IsValid)
             {
                 return Json(new { success = false, message = "Invalid user data." });
             }
 
+            // Create a new user object
             var user = new User
             {
                 UserName = model.UserName,
@@ -98,7 +103,9 @@ namespace SignatureClinicTreatmentPlanner.Controllers
                 EmailConfirmed = true // Auto-confirm email
             };
 
-            var result = await _userManager.CreateAsync(user, model.PasswordHash); // Use Identity Password Hashing
+            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, model.PasswordHash);
+
+            var result = await _userManager.CreateAsync(user);
 
             if (result.Succeeded)
             {

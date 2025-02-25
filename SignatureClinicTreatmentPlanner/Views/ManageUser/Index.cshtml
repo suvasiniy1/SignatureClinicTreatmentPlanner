@@ -51,6 +51,14 @@
             <div class="modal-body">
                 <form id="userForm">
                     <div class="mb-3">
+                        <label>First Name</label>
+                        <input type="text" class="form-control" id="FirstName" required />
+                    </div>
+                    <div class="mb-3">
+                        <label>Last Name</label>
+                        <input type="text" class="form-control" id="LastName" required />
+                    </div>
+                    <div class="mb-3">
                         <label>User Name</label>
                         <input type="text" class="form-control" id="UserName" required />
                     </div>
@@ -139,14 +147,17 @@
         });
     }
 
-    function saveUser() {
+                function saveUser() {
         let userData = {
             UserName: $("#UserName").val(),
-            Password: $("#Password").val(),
-            EmailID: $("#EmailID").val(),
+            PasswordHash: $("#Password").val(),  // ✅ Match C# property name
+            Email: $("#EmailID").val(),
+            FirstName: $("#FirstName").val(),
+            LastName: $("#LastName").val(),
             RoleId: $("#RoleDropdown").val(),
             IsActive: $("#IsActive").is(":checked")
         };
+
         $.post("/ManageUser/Create", userData, function (response) {
             if (response.success) {
                 $("#addUserModal").modal("hide");
@@ -157,6 +168,7 @@
             }
         });
     }
+
 
                        function LoadRoles() {
         $.get("/ManageUser/GetRoles", function (response) {
