@@ -11,7 +11,7 @@ namespace SignatureClinicTreatmentPlanner.Models
         [Key]
         public override int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Role is required.")]
         public string Name { get; set; }
 
         public virtual ICollection<User> Users { get; set; } = new List<User>();

@@ -33,28 +33,34 @@ namespace SignatureClinicTreatmentPlanner.Controllers
             try
             {
                 string sql = @"
-            SELECT 
-                u.Id, 
-                u.UserName,
-                u.FirstName,
-                u.LastName,
-                u.Email, 
-                COALESCE(r.Name, 'No Role') AS RoleName, 
-                u.IsActive
-            FROM AspNetUsers u
-            LEFT JOIN Roles r ON u.RoleId = r.Id";
+        SELECT 
+            u.Id, 
+            u.UserName,
+            u.FirstName,
+            u.LastName,
+            u.Email, 
+            COALESCE(u.PhoneNumber, '') AS PhoneNumber,
+            COALESCE(r.Name, 'No Role') AS RoleName, 
+            u.RoleId,  -- ✅ Ensure RoleId is returned
+            u.IsActive
+        FROM AspNetUsers u
+        LEFT JOIN Roles r ON u.RoleId = r.Id";
 
-                using (var connection = _context.Database.GetDbConnection()) // ✅ Get DB Connection
+                using (var connection = _context.Database.GetDbConnection())
                 {
                     var users = await connection.QueryAsync<UserDto>(sql);
                     var formattedUsers = users.Select(u => new {
+                        id = u.Id, // ✅ Ensure ID is included
                         userName = u.UserName,
                         firstName = u.FirstName,
                         lastName = u.LastName,
                         email = u.Email,
+                        phoneNumber = u.PhoneNumber ?? "N/A",
+                        roleId = u.RoleId,
                         roleName = u.RoleName,
                         isActive = u.IsActive
                     }).ToList();
+
                     return Json(new { data = formattedUsers });
                 }
             }
@@ -63,6 +69,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
                 return Json(new { error = ex.Message });
             }
         }
+
 
 
         // Fetch user details by ID
@@ -79,31 +86,40 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(User model)
+        public async Task<IActionResult> Create([Bind("UserName,FirstName,LastName,Email,RoleId,,PhoneNumber,IsActive,PasswordHash")] User model)
         {
-            if (string.IsNullOrEmpty(model.FirstName) || string.IsNullOrEmpty(model.LastName))
+            if (model.RoleId == 0)
             {
-                return Json(new { success = false, message = "First Name and Last Name are required." });
+                return Json(new { success = false, message = "Role is required." });
             }
+
+            ModelState.Remove("Role");
 
             if (!ModelState.IsValid)
             {
-                return Json(new { success = false, message = "Invalid user data." });
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                Console.WriteLine("ModelState Errors: " + string.Join(", ", errors));
+                return Json(new { success = false, message = "Invalid user data.", errors = errors });
             }
 
-            // Create a new user object
             var user = new User
             {
                 UserName = model.UserName,
                 Email = model.Email,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
+                PhoneNumber = model.PhoneNumber,
                 RoleId = model.RoleId,
                 IsActive = model.IsActive,
-                EmailConfirmed = true // Auto-confirm email
+                EmailConfirmed = true,
+                CreatedDate = DateTime.UtcNow,  // ✅ Ensure valid default value
+                ModifiedDate = null
             };
 
+            // Encrypt Password Before Saving
             user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, model.PasswordHash);
+
+            Console.WriteLine($"Inserting user with CreatedDate: {user.CreatedDate}");
 
             var result = await _userManager.CreateAsync(user);
 
@@ -115,15 +131,11 @@ namespace SignatureClinicTreatmentPlanner.Controllers
             return Json(new { success = false, message = "Error creating user.", errors = result.Errors });
         }
 
+
         // Update existing user
         [HttpPost]
         public async Task<IActionResult> Update(User model)
         {
-            if (!ModelState.IsValid)
-            {
-                return Json(new { success = false, message = "Invalid user data." });
-            }
-
             var user = await _context.Users.FindAsync(model.Id);
             if (user == null)
             {
@@ -136,16 +148,17 @@ namespace SignatureClinicTreatmentPlanner.Controllers
             user.IsActive = model.IsActive;
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
-
+            user.PhoneNumber = model.PhoneNumber;
+            user.ModifiedDate = DateTime.UtcNow;
+            // ✅ Do NOT update PasswordHash to avoid overriding the existing password
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "User updated successfully!" });
         }
 
-        // Delete user
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeactivateUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -153,10 +166,13 @@ namespace SignatureClinicTreatmentPlanner.Controllers
                 return Json(new { success = false, message = "User not found." });
             }
 
-            _context.Users.Remove(user);
+            user.IsActive = false; // ✅ Set user as inactive instead of deleting
+            user.ModifiedDate = DateTime.UtcNow;
+
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true, message = "User deleted successfully!" });
+            return Json(new { success = true, message = "User deactivated successfully!" });
         }
         [HttpGet]
         public async Task<IActionResult> GetRoles()

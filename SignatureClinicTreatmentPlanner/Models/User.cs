@@ -17,11 +17,11 @@ namespace SignatureClinicTreatmentPlanner.Models
 
         public int RoleId { get; set; }  // Foreign Key for Role
         [ForeignKey("RoleId")]
-        public virtual Role Role { get; set; }  // ✅ Navigation Property
+        public virtual Role? Role { get; set; }
 
         public int HospitalID { get; set; }
         public override string? PasswordHash { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public string? CreatedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
         public string? ModifiedBy { get; set; }
