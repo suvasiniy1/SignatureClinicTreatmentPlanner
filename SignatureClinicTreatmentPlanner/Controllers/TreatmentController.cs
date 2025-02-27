@@ -15,6 +15,14 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         }
         public IActionResult Index()
         {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("UserName")))
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            ViewBag.UserName = HttpContext.Session.GetString("UserName");
+            ViewBag.FullName = HttpContext.Session.GetString("FullName");
+            ViewBag.UserInitials = HttpContext.Session.GetString("UserInitials");
             return View();
         }
         [HttpGet]
