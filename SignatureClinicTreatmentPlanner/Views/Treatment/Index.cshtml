@@ -119,7 +119,7 @@
     });
 
             function EditTreatment(id) {
-    $.get("/Treatment/GetTreatment/" + id, function (data) {
+        $.get('@Href("~/Treatment/GetTreatment/")' + id, function (data) {
         console.log("Edit Treatment Response:", data);  // ✅ Debugging output
 
         if (!data || !data.treatmentID) {
@@ -135,7 +135,7 @@
 
         // ✅ Fetch and bind assigned surgeons
         $.ajax({
-            url: "/Treatment/GetSurgeonsByTreatment",
+            url: '@Href("~/Treatment/GetSurgeonsByTreatment")',
             type: "GET",
             data: { treatmentId: id },
             success: function (response) {
@@ -172,7 +172,7 @@
         }
 
         $.ajax({
-            url: "/Treatment/GetTreatments",
+            url: '@Href("~/Treatment/GetTreatments")',
             type: "GET",
             datatype: "json",
             success: function (data) {
@@ -224,7 +224,7 @@
 
        function LoadSurgeons() {
         $.ajax({
-            url: "/Treatment/GetSurgeons",
+            url: '@Href("~/Treatment/GetSurgeons")',
             type: "GET",
             success: function (response) {
                 console.log("Surgeons received:", response);  // ✅ Debugging output
@@ -254,7 +254,7 @@
 
         if (treatmentId) { // ✅ Update Existing Treatment (without changing surgeon)
             $.ajax({
-                url: "/Treatment/UpdateTreatment",
+                url: '@Href("~/Treatment/UpdateTreatment")',
                 type: "POST",
                 data: { treatmentId: treatmentId, treatmentName: treatmentName },
                 success: function (response) {
@@ -272,7 +272,7 @@
             });
         } else { // ✅ Create New Treatment
             $.ajax({
-                url: "/Treatment/CreateTreatment",
+                url: '@Href("~/Treatment/CreateTreatment")',
                 type: "POST",
                 data: { treatmentName: treatmentName, surgeonId: surgeonId },
                 success: function (response) {
@@ -302,7 +302,7 @@
 
     function DeleteTreatment(id) {
         if (confirm("Are you sure you want to delete this treatment?")) {
-            $.post("/Treatment/RemoveTreatment", { id: id }, function (response) {
+                $.post('@Href("~/Treatment/RemoveTreatment")', { id: id }, function(response) {
                 if (response.success) {
                     toastr.success(response.message);
                     LoadTreatmentData();

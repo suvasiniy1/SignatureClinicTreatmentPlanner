@@ -97,7 +97,7 @@
 
         <div class="d-flex align-items-center justify-content-between">
             <a href="@Url.Action("Index", "Admin", new { admin = "Admin" })" class="logo d-flex align-items-center">
-                <img src="~/images/logo.jpeg" class="admin-logo" />
+                <img src="@Url.Content("~/images/logo.jpeg")" class="admin-logo" />
                 <span class="admin-text d-none d-lg-block">Admin</span>
             </a>
             <i class="bi bi-list toggle-sidebar-btn"></i>

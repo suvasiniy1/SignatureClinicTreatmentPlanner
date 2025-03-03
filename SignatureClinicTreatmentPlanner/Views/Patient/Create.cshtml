@@ -95,7 +95,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-left">
-            <img src="/images/logo.jpeg" alt="Signature Clinic Logo" class="logo">
+            <img src="@Url.Content("~/images/logo.jpeg")" alt="Signature Clinic Logo" class="logo">
             <span class="navbar-brand">Patient Treatment Form</span>
         </div>
         <div class="user-info">
@@ -191,7 +191,7 @@
                 var treatmentID = $(this).val(); // Get selected treatment ID
                 if (treatmentID) {
                     $.ajax({
-                        url: '/Patient/GetSurgeonsByTreatment', // API Endpoint
+                        url: '@Href("~/Patient/GetSurgeonsByTreatment")', // API Endpoint
                         data: { treatmentID: treatmentID },
                         success: function (surgeons) {
                             $('#SurgeonDropdown').empty();
@@ -218,7 +218,7 @@
 
             if (selectedSurgeonID) {
                 $.ajax({
-                    url: '/Patient/GetClinicsBySurgeon', // Update endpoint to match method name
+                    url: '@Href("~/Patient/GetClinicsBySurgeon")', // Update endpoint to match method name
                     data: { surgeonID: selectedSurgeonID },  // Send as an integer
                     success: function (clinics) {
                         console.log("Clinics received:", clinics); // Debugging output

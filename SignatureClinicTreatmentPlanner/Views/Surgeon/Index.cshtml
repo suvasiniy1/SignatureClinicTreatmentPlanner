@@ -180,7 +180,7 @@
         }
 
         $.ajax({
-            url: "/Surgeon/GetSurgeons",
+            url: '@Href("~/Surgeon/GetSurgeons")',
             type: "GET",
             datatype: "json",
             success: function (data) {
@@ -224,7 +224,7 @@
         console.log("Fetching clinics..."); // Debugging log
 
         $.ajax({
-            url: "/Surgeon/GetClinics",
+            url: '@Href("~/Surgeon/GetClinics")',
             type: "GET",
             success: function (response) {
                 console.log("Clinics received:", response); // Debugging log
@@ -243,7 +243,7 @@
     // ✅ Fetch clinics assigned to the selected surgeon
     function LoadClinicsBySurgeon(surgeonId) {
         $.ajax({
-            url: "/Surgeon/GetClinicsBySurgeon",
+            url: '@Href("~/Surgeon/GetClinicsBySurgeon")',
             type: "GET",
             data: { surgeonId: surgeonId },
             success: function (clinics) {
@@ -270,7 +270,7 @@
 
         if (surgeonId) { // ✅ Update Existing Surgeon
             $.ajax({
-                url: "/Surgeon/UpdateSurgeon",
+                url: '@Href("~/Surgeon/UpdateSurgeon")',
                 type: "POST",
                 data: { surgeonId: surgeonId, surgeonName: surgeonName },
                 success: function (response) {
@@ -288,7 +288,7 @@
             });
         } else { // ✅ Create New Surgeon
             $.ajax({
-                url: "/Surgeon/CreateSurgeon",
+                url: '@Href("~/Surgeon/CreateSurgeon")',
                 type: "POST",
                 data: { surgeonName: surgeonName, clinicId: clinicId },
                 success: function (response) {
@@ -324,7 +324,7 @@
         $("#SaveSurgeonBtn").text("Update Surgeon");
 
         $.ajax({
-            url: "/Surgeon/GetClinicsBySurgeon",
+            url: '@Href("~/Surgeon/GetClinicsBySurgeon")',
             type: "GET",
             data: { surgeonId: surgeonId },
             success: function (clinics) {
@@ -351,7 +351,7 @@
         }
 
         $.ajax({
-            url: "/Surgeon/DeleteSurgeon",
+            url: '@Href("~/Surgeon/DeleteSurgeon")',
             type: "POST",
             data: { surgeonId: surgeonId },
             success: function (response) {

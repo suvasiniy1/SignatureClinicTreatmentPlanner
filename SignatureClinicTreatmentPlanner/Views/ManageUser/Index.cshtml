@@ -117,7 +117,7 @@
 
     });
             function LoadRoles() {
-        $.get("/ManageUser/GetRoles", function (response) {
+            $.get('@Href("~/ManageUser/GetRoles")', function (response) {
             if (response.success) {
                 $("#RoleDropdown").empty().append('<option value="">Select a Role</option>');
 
@@ -138,7 +138,7 @@
 
         var table = $("#tblUser").DataTable({
             "ajax": {
-                "url": "/ManageUser/GetUsers",
+                "url": '@Href("~/ManageUser/GetUsers")',
                 "type": "GET",
                 "datatype": "json",
                 "dataSrc": "data"
@@ -215,7 +215,7 @@
    
 
         function confirmDeactivateUser(id) {
-        $.post("/ManageUser/DeactivateUser", { id: id }, function (response) {
+            $.post('@Href("~/ManageUser/DeactivateUser")', { id: id }, function (response) {
             if (response.success) {
                 $("#deactivateUserModal").modal("hide"); // Close the modal
                 LoadUsers(); // Refresh the DataTable
@@ -246,7 +246,7 @@
 
         console.log("🚀 Sending User Data:", userData);
 
-        let url = userId ? "/ManageUser/Update" : "/ManageUser/Create"; // Decide API route
+        let url = userId ? '@Href("~/ManageUser/Update")' :'@Href("~/ManageUser/Create")'; // Decide API route
         let successMessage = userId ? "User updated successfully!" : "User added successfully!";
 
         $.post(url, userData, function (response) {
@@ -270,7 +270,7 @@
 
 
                function LoadRoles(selectedRoleId = null) {
-        $.get("/ManageUser/GetRoles", function (response) {
+            $.get('@Href("~/ManageUser/GetRoles")', function (response) {
             console.log("🎯 API Role Data:", response); // ✅ Debugging response
 
             if (response.success) {
@@ -341,7 +341,7 @@
         // Clear previous user data before opening modal
         $("#userForm")[0].reset();
 
-        $.get("/ManageUser/GetUser/" + id, function (user) {
+        $.get('@Href("~/ManageUser/GetUser/")'+id, function (user) {
             if (!user || user.success === false) {
                 alert("⚠ Error: User data not found!");
                 return;
@@ -393,7 +393,7 @@
 
         console.log("🚀 Updating User Data:", userData);
 
-        $.post("/ManageUser/Update", userData, function (response) {
+            $.post('@Href("~/ManageUser/Update")', userData, function (response) {
             if (response.success) {
                 $("#addUserModal").modal("hide");
                 LoadUsers();
