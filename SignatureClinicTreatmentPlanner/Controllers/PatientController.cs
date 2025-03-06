@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace SignatureClinicTreatmentPlanner.Controllers
 {
+    [Route("Patient")]
     public class PatientController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,7 +21,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         }
 
         // GET: /Patient/Create
-        [Authorize]
+        [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
             // Get the logged-in user
@@ -94,7 +95,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
 
             return View();
         }
-        [HttpPost]
+        [HttpPost("Create")] // Ensure it explicitly allows POST requests
         public IActionResult Create(Patient model)
         {
             if (ModelState.IsValid)
@@ -105,6 +106,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
             }
             return View(model);
         }
+
 
         // POST: /Patient/Create
         //[HttpPost]
@@ -139,7 +141,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         //    return View(model);
         //}
         // Fetch Surgeons by Treatment
-        [HttpGet]
+        [HttpGet("GetSurgeonsByTreatment")]
         public IActionResult GetSurgeonsByTreatment(int treatmentID)
         {
             var surgeons = _context.Surgeons
@@ -153,7 +155,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         // Fetch Clinics by Surgeons
 
 
-        [HttpGet]
+        [HttpGet("GetClinicsBySurgeon")]
         public IActionResult GetClinicsBySurgeon(int surgeonID)  // Accept a single integer
         {
             if (surgeonID <= 0)

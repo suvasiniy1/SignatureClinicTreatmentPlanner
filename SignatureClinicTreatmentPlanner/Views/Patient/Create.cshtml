@@ -103,7 +103,7 @@
             <span class="welcome-text">Welcome,</span>
             <span class="username-text">@ViewBag.UserName</span>
             <span class="separator">|</span>
-            <a href="/Login/Index" class="logout-btn">
+            <a href="@Url.Action("Index", "Login")" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Log Out
             </a>
         </div>
@@ -112,10 +112,9 @@
     <!-- Main Container -->
     <div class="container mt-5">
         <div class="card shadow-lg p-4">
-
             <!-- Form Section Wrapped in a Box -->
             <div class="form-container">
-                <form method="post" action="/Patient/Create">
+                <form method="post" asp-action="Create" asp-controller="Patient">
                     <div class="mb-3">
                         <label class="form-label">First Name:</label>
                         <input type="text" class="form-control" name="FirstName" required />
@@ -147,6 +146,7 @@
                             }
                         </select>
                     </div>
+
                     <!-- Surgeon Dropdown -->
                     <div class="mb-3">
                         <label class="form-label">Surgeon:</label>
@@ -154,17 +154,6 @@
                             <option value="">Select Surgeon</option>
                         </select>
                     </div>
-
-                   @*  <!-- Surgeon Selection -->
-                    <div class="mb-3">
-                        <label class="form-label">Surgeon(s):</label>
-                        <div id="SurgeonsContainer" class="form-control" style="overflow-y: auto; max-height: 200px;">
-                            <div>
-                                <input type="checkbox" id="selectAllSurgeons" /> Select All
-                            </div>
-                        </div>
-                    
-                    </div> *@
 
                     <!-- Clinic Dropdown -->
                     <div class="mb-3">
@@ -174,12 +163,12 @@
                         </select>
                     </div>
 
-
                     <div class="text-center">
                         <button type="submit" class="btn btn-primary">Generate PDF & Send Email</button>
                     </div>
                 </form>
             </div>
+
         </div>
     </div>
 
@@ -191,7 +180,7 @@
                 var treatmentID = $(this).val(); // Get selected treatment ID
                 if (treatmentID) {
                     $.ajax({
-                        url: '@Href("~/Patient/GetSurgeonsByTreatment")', // API Endpoint
+                        url: '@Url.Action("GetSurgeonsByTreatment", "Patient")',  // API Endpoint
                         data: { treatmentID: treatmentID },
                         success: function (surgeons) {
                             $('#SurgeonDropdown').empty();
@@ -218,7 +207,7 @@
 
             if (selectedSurgeonID) {
                 $.ajax({
-                    url: '@Href("~/Patient/GetClinicsBySurgeon")', // Update endpoint to match method name
+                    url: '@Url.Action("GetClinicsBySurgeon", "Patient")',  // API Endpoint
                     data: { surgeonID: selectedSurgeonID },  // Send as an integer
                     success: function (clinics) {
                         console.log("Clinics received:", clinics); // Debugging output
