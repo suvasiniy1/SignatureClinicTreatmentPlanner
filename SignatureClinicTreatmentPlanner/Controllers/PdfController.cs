@@ -61,8 +61,39 @@ namespace SignatureClinicTreatmentPlanner.Controllers
 
                 string htmlContent = System.IO.File.ReadAllText(htmlTemplatePath);
 
-            // ✅ Replace placeholders with actual values
-            htmlContent = htmlContent
+                // ✅ Determine absolute path based on environment
+                string localImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "header.PNG");
+                string serverImagePath = "C:\\inetpub\\wwwroot\\SignatureTreatmentPlanner\\wwwroot\\images\\header.PNG";
+
+                // ✅ Convert logo to Base64 or use fallback URL
+                string logoPlaceholder = "##LOGO##";
+                string logoBase64 = null;
+
+                // Check which path is available (Local or Server)
+                if (System.IO.File.Exists(localImagePath))
+                {
+                    logoBase64 = ConvertImageToBase64(localImagePath);
+                }
+                else if (System.IO.File.Exists(serverImagePath))
+                {
+                    logoBase64 = ConvertImageToBase64(serverImagePath);
+                }
+
+                if (!string.IsNullOrEmpty(logoBase64))
+                {
+                    htmlContent = htmlContent.Replace(logoPlaceholder, $"data:image/png;base64,{logoBase64}");
+                }
+                else
+                {
+                    // If image is missing in both local and server, use fallback URL
+                    htmlContent = htmlContent.Replace(logoPlaceholder, "https://www.y1crm.com/images/header.PNG");
+                }
+
+
+
+
+                // ✅ Replace placeholders with actual values
+                htmlContent = htmlContent
                 .Replace("##USERNAME##", patient.FirstName)
                 .Replace("##TREATMENT##", treatment.TreatmentName)
                 .Replace("##AMOUNT##", patient.Price.ToString("C2", new CultureInfo("en-GB"))) // ✅ Correct currency formatting
@@ -109,6 +140,26 @@ namespace SignatureClinicTreatmentPlanner.Controllers
             {
                 return Content($"Error: {ex.Message}");
             }
+        }
+
+        // ✅ Convert Image to Base64
+        private string ConvertImageToBase64(string relativePath)
+        {
+            try
+            {
+                string imagePath = Path.Combine(_webHostEnvironment.WebRootPath, relativePath);
+                if (System.IO.File.Exists(imagePath))
+                {
+                    byte[] imageBytes = System.IO.File.ReadAllBytes(imagePath);
+                    return Convert.ToBase64String(imageBytes);
+                }
+            }
+            catch (Exception ex)
+            {
+                string errorLogPath = Path.Combine(_webHostEnvironment.WebRootPath, "logs", "error_log.txt");
+                System.IO.File.AppendAllText(errorLogPath, $"Error loading image: {ex.Message}\n{ex.StackTrace}\n\n");
+            }
+            return null;
         }
 
         /// <summary>
