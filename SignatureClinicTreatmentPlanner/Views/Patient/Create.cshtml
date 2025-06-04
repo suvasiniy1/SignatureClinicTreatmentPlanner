@@ -95,7 +95,9 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-left">
-            <img src="/images/logo.jpeg" alt="Signature Clinic Logo" class="logo">
+          @*   <img src="/images/logo.jpeg" alt="Signature Clinic Logo" class="logo"> *@
+            <img src="@Url.Content("~/images/logo.jpeg")" alt="Signature Clinic Logo" class="logo"/>
+
             <span class="navbar-brand">Patient Treatment Form</span>
         </div>
         <div class="user-info">
@@ -103,7 +105,7 @@
             <span class="welcome-text">Welcome,</span>
             <span class="username-text">@ViewBag.UserName</span>
             <span class="separator">|</span>
-            <a href="/Login/Index" class="logout-btn">
+            <a href="@Url.Action("Index", "Login")" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Log Out
             </a>
         </div>
@@ -115,7 +117,7 @@
 
             <!-- Form Section Wrapped in a Box -->
             <div class="form-container">
-                <form method="post" action="/Patient/Create">
+                <form method="post" action="@Url.Action("Create", "Patient")">
                     <div class="mb-3">
                         <label class="form-label">First Name:</label>
                         <input type="text" class="form-control" name="FirstName" required />
@@ -191,7 +193,7 @@
                 var treatmentID = $(this).val(); // Get selected treatment ID
                 if (treatmentID) {
                     $.ajax({
-                        url: '/Patient/GetSurgeonsByTreatment', // API Endpoint
+                        url: '@Url.Action("GetSurgeonsByTreatment", "Patient")',
                         data: { treatmentID: treatmentID },
                         success: function (surgeons) {
                             $('#SurgeonDropdown').empty();
@@ -218,7 +220,7 @@
 
             if (selectedSurgeonID) {
                 $.ajax({
-                    url: '/Patient/GetClinicsBySurgeon', // Update endpoint to match method name
+                    url: '@Url.Action("GetClinicsBySurgeon", "Patient")', 
                     data: { surgeonID: selectedSurgeonID },  // Send as an integer
                     success: function (clinics) {
                         console.log("Clinics received:", clinics); // Debugging output

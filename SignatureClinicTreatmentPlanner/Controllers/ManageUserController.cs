@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Newtonsoft.Json;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace SignatureClinicTreatmentPlanner.Controllers
 {
@@ -53,7 +54,9 @@ namespace SignatureClinicTreatmentPlanner.Controllers
                         lastName = u.LastName,
                         email = u.Email,
                         roleName = u.RoleName,
-                        isActive = u.IsActive
+                        isActive = u.IsActive,
+                        id = u.Id
+
                     }).ToList();
                     return Json(new { data = formattedUsers });
                 }
@@ -69,14 +72,39 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            try
             {
-                return Json(new { success = false, message = "User not found." });
-            }
+                var user = await (from u in _context.Users
+                                  join r in _context.Roles on u.RoleId equals r.Id into roleGroup
+                                  from role in roleGroup.DefaultIfEmpty()  // Left join to handle null roles
+                                  where u.Id == id
+                                  select new
+                                  {
+                                      u.Id,
+                                      u.UserName,
+                                      u.FirstName,
+                                      u.LastName,
+                                      u.Email,
+                                      u.IsActive,
+                                      RoleId = u.RoleId,
+                                      RoleName = role != null ? role.Name : null  // Avoid null reference error
+                                  })
+                                 .FirstOrDefaultAsync();
 
-            return Json(user);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "User not found." });
+                }
+
+                return Json(new { success = true, data = user });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> Create(User model)

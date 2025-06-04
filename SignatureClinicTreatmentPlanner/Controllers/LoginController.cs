@@ -21,8 +21,8 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         public LoginController(ApplicationDbContext context, SignInManager<User> signInManager, UserManager<User> userManager)
         {
             _context = context;
-            _signInManager = signInManager;
-            _userManager = userManager;
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         }
 
         [HttpGet]

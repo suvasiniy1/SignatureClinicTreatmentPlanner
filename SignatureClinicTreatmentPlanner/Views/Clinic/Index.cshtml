@@ -109,7 +109,7 @@
             "pageLength": 10,
             "dom": "rtip",
             "ajax": {
-                "url": "/Clinic/GetClinics",
+                "url": "@Url.Action("GetClinics", "Clinic")",
                 "type": "GET",
                 "datatype": "json",
                 "dataSrc": "data" // ✅ Ensure DataTables reads from "data" key
@@ -147,7 +147,7 @@
         }
 
         $.ajax({
-            url: clinic.ClinicID > 0 ? "/Clinic/UpdateClinicDetails" : "/Clinic/Create",
+            url: clinic.ClinicID > 0 ? "@Url.Action("UpdateClinicDetails", "Clinic")" : "@Url.Action("Create", "Clinic")",
             type: "POST",
             contentType: "application/json", // ✅ Ensure JSON format
             dataType: "json",  // ✅ Ensure response is JSON
@@ -179,7 +179,7 @@
                     function EditClinic(id) {
         console.log("Fetching clinic with ID:", id); // Debugging
 
-        $.get("/Clinic/GetClinic", { id: id }) // Ensure ID is sent correctly
+        $.get("@Url.Action("GetClinic", "Clinic")", { id: id })
             .done(function (data) {
                 console.log("API Response:", data); // Debugging
 
@@ -204,7 +204,7 @@
         function DeleteClinic(id) {
         if (confirm("Are you sure you want to delete this clinic?")) {
             $.ajax({
-                url: "/Clinic/Remove",
+                url: "@Url.Action("Remove", "Clinic")",
                 type: "POST",
                 data: { id: id },
                 success: function (response) {

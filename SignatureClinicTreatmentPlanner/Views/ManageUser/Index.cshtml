@@ -104,7 +104,7 @@
        
     });
         function LoadRoles() {
-        $.get("/ManageUser/GetRoles", function (response) {
+        $.get("@Url.Action("GetRoles", "ManageUser")", function (response) {
             if (response.success) {
                 $("#RoleDropdown").empty().append('<option value="">Select a Role</option>');
                 $.each(response.data, function (index, role) {
@@ -122,7 +122,7 @@
         }
         $("#tblUser").DataTable({
             "ajax": {
-                "url": "/ManageUser/GetUsers",
+                "url": "@Url.Action("GetUsers", "ManageUser")",
                 "type": "GET",
                 "datatype": "json",
                 "dataSrc": "data"
@@ -132,20 +132,55 @@
                 { "data": "firstName", "title": "First Name" },
                 { "data": "lastName", "title": "Last Name" },
                 { "data": "email", "title": "Email" },
-                { "data": "roleName", "title": "Role" },
+                { "data": "roleName", "title": "Role Name" },
                 { "data": "isActive", "title": "Active?", "render": function (data) {
                     return data ? "Active" : "Inactive";
                 }},
                 {
-                    "data": "id", "render": function (data) {  // ✅ Ensure lowercase "id"
-                        return `
-                            <button class='btn btn-warning btn-sm' onclick='editUser(${data})'>Edit</button>
-                            <button class='btn btn-danger btn-sm' onclick='deleteUser(${data})'>Delete</button>`;
-                    }
+                         "data": "id", "render": function (data, type, row) {
+        console.log("Row Data:", row); // ✅ Debugging log
+        return `
+            <button class='btn btn-warning btn-sm' onclick='editUser(${row.id})'>Edit</button>
+            <button class='btn btn-danger btn-sm' onclick='deleteUser(${row.id})'>Delete</button>
+        `;
+    }
                 }
             ]
         });
     }
+        function editUser(id) {
+        console.log("Editing User ID:", id);  // ✅ Debugging output
+
+        $.ajax({
+            url: "@Url.Action("GetUser", "ManageUser")",  // ✅ Fetch user details
+            type: "GET",
+            data: { id: id },  // ✅ Properly pass ID as a parameter
+            success: function (data) {
+                console.log("User Data:", data);  // ✅ Debugging output
+
+                if (!data || !data.Id) {
+                    alert("Error: User data not found.");
+                    return;
+                }
+
+                // ✅ Populate form fields with retrieved user data
+                $("#UserName").val(data.UserName);
+                $("#FirstName").val(data.FirstName);
+                $("#LastName").val(data.LastName);
+                $("#EmailID").val(data.Email);
+              //  $("#RoleDropdown").val(data.roleId);
+                $("#RoleDropdown").val(data.RoleName);
+                $("#IsActive").prop("checked", data.IsActive);
+                 // ✅ Load roles first, then set the selected role
+                LoadRoles(data.roleId);
+                $("#addUserModal").modal("show");  // ✅ Open modal
+            },
+            error: function () {
+                alert("Error fetching user details.");
+            }
+        });
+    }
+
 
                 function saveUser() {
         let userData = {
@@ -158,7 +193,7 @@
             IsActive: $("#IsActive").is(":checked")
         };
 
-        $.post("/ManageUser/Create", userData, function (response) {
+         $.post("@Url.Action("Create", "ManageUser")", userData, function (response) {
             if (response.success) {
                 $("#addUserModal").modal("hide");
                 LoadUsers();
@@ -171,7 +206,8 @@
 
 
                        function LoadRoles() {
-        $.get("/ManageUser/GetRoles", function (response) {
+        $.get("@Url.Action("GetRoles", "ManageUser")", function (response)
+        {
             console.log("API Response:", response); // ✅ Debugging API response
 
             if (response.success) {
@@ -195,7 +231,7 @@
     });
     function deleteUser(id) {
         if (confirm("Are you sure you want to delete this user?")) {
-            $.post("/ManageUser/Delete", { id: id }, function (response) {
+            $.post("@Url.Action("Delete", "ManageUser")", { id: id }, function (response) {
                 if (response.success) {
                     LoadUsers();
                     alert("User deleted successfully!");

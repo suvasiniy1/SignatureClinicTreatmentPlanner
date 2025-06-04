@@ -4,11 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using SignatureClinicTreatmentPlanner.Models;
+using SixLabors.ImageSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SignatureClinic_Global_ConnectionString")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SignatureClinic_Global_ConnectionString")).EnableSensitiveDataLogging()  // Helps debug issues
+           .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
 // Add services to the container
 builder.Services.AddControllersWithViews();

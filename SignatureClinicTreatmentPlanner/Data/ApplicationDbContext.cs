@@ -26,9 +26,15 @@ namespace SignatureClinicTreatmentPlanner.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // 🔹 Rename Identity Tables
-            modelBuilder.Entity<User>().ToTable("AspNetUsers");
+            modelBuilder.Entity<User>()
+        .ToTable("AspNetUsers")
+        .HasDiscriminator<string>("Discriminator")
+        .HasValue<User>("User");  // ✅ Explicitly map User entity
 
+
+            // 🔹 Rename Identity Tables
+            //modelBuilder.Entity<User>().ToTable("AspNetUsers");
+            //modelBuilder.Entity<Role>().ToTable("Roles");
             modelBuilder.Entity<IdentityRole<int>>().ToTable("Roles");
             modelBuilder.Entity<IdentityUserRole<int>>().ToTable("UserRoles");
             modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");

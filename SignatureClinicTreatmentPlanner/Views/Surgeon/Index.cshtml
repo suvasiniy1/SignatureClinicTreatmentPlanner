@@ -180,7 +180,7 @@
         }
 
         $.ajax({
-            url: "/Surgeon/GetSurgeons",
+            url: "@Url.Action("GetSurgeons", "Surgeon")",
             type: "GET",
             datatype: "json",
             success: function (data) {
@@ -224,7 +224,7 @@
         console.log("Fetching clinics..."); // Debugging log
 
         $.ajax({
-            url: "/Surgeon/GetClinics",
+            url: "@Url.Action("GetClinics", "Surgeon")",
             type: "GET",
             success: function (response) {
                 console.log("Clinics received:", response); // Debugging log
@@ -243,7 +243,7 @@
     // ✅ Fetch clinics assigned to the selected surgeon
     function LoadClinicsBySurgeon(surgeonId) {
         $.ajax({
-            url: "/Surgeon/GetClinicsBySurgeon",
+            url: "@Url.Action("GetClinicsBySurgeon", "Surgeon")",
             type: "GET",
             data: { surgeonId: surgeonId },
             success: function (clinics) {
@@ -270,7 +270,8 @@
 
         if (surgeonId) { // ✅ Update Existing Surgeon
             $.ajax({
-                url: "/Surgeon/UpdateSurgeon",
+                //url: "/Surgeon/UpdateSurgeon",
+                url: "@Url.Action("UpdateSurgeon", "Surgeon")",
                 type: "POST",
                 data: { surgeonId: surgeonId, surgeonName: surgeonName },
                 success: function (response) {
@@ -288,7 +289,8 @@
             });
         } else { // ✅ Create New Surgeon
             $.ajax({
-                url: "/Surgeon/CreateSurgeon",
+                //url: "/Surgeon/CreateSurgeon",
+                url: "@Url.Action("CreateSurgeon", "Surgeon")",
                 type: "POST",
                 data: { surgeonName: surgeonName, clinicId: clinicId },
                 success: function (response) {
@@ -324,7 +326,8 @@
         $("#SaveSurgeonBtn").text("Update Surgeon");
 
         $.ajax({
-            url: "/Surgeon/GetClinicsBySurgeon",
+           // url: "/Surgeon/GetClinicsBySurgeon",
+            url: "@Url.Action("GetClinicsBySurgeon", "Surgeon")",
             type: "GET",
             data: { surgeonId: surgeonId },
             success: function (clinics) {
@@ -351,7 +354,8 @@
         }
 
         $.ajax({
-            url: "/Surgeon/DeleteSurgeon",
+           // url: "/Surgeon/DeleteSurgeon",
+            url: "@Url.Action("DeleteSurgeon", "Surgeon")",
             type: "POST",
             data: { surgeonId: surgeonId },
             success: function (response) {
