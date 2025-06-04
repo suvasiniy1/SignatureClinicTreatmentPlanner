@@ -93,19 +93,23 @@ namespace SignatureClinicTreatmentPlanner.Controllers
                 ViewBag.Clinics = clinics;
             }
 
-            return View();
+            return View(new Patient());
         }
-        [HttpPost("Create")] // Ensure it explicitly allows POST requests
+        [HttpPost("Create")]
         public IActionResult Create(Patient model)
         {
             if (ModelState.IsValid)
             {
                 _context.Patients.Add(model);
                 _context.SaveChanges();
-                return RedirectToAction("GeneratePdf", "Pdf", new { id = model.Id });
+
+                // Return Patient ID so frontend can call GeneratePdf
+                return Json(new { success = true, patientId = model.Id });
             }
-            return View(model);
+
+            return BadRequest("Invalid patient data.");
         }
+
 
 
         // POST: /Patient/Create
