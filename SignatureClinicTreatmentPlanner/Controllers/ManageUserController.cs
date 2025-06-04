@@ -68,7 +68,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
                         roleId = u.RoleId,
                         roleName = u.RoleName,
                         isActive = u.IsActive,
-                        id = u.Id
+                    
 
                     }).ToList();
 

@@ -7,6 +7,9 @@ using SignatureClinicTreatmentPlanner.Models;
 using SixLabors.ImageSharp;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddSingleton<EmailSettings>();  // OR AddScoped/AddTransient
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SignatureClinic_Global_ConnectionString")).EnableSensitiveDataLogging()  // Helps debug issues

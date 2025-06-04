@@ -198,12 +198,13 @@
                 const messageDiv = $('#submitMessage');
 
                 $.ajax({
-                    url: '/Patient/Create',
+                    url: '@Url.Action("Create", "Patient")',
                     type: 'POST',
                     data: formData,
                     success: function (response) {
+                        var generatePdfUrl = '@Url.Action("GeneratePdf", "Pdf")';
                         $.ajax({
-                            url: `/Pdf/GeneratePdf/${response.patientId}`,
+                            url:  `${generatePdfUrl}/${response.patientId}`,
                             type: 'GET',
                             success: function () {
                                 messageDiv
