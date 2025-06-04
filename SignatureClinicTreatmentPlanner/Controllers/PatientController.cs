@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace SignatureClinicTreatmentPlanner.Controllers
 {
+    [Route("Patient")]
     public class PatientController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,7 +21,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         }
 
         // GET: /Patient/Create
-        [Authorize]
+        [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
             // Get the logged-in user
@@ -92,19 +93,24 @@ namespace SignatureClinicTreatmentPlanner.Controllers
                 ViewBag.Clinics = clinics;
             }
 
-            return View();
+            return View(new Patient());
         }
-        [HttpPost]
+        [HttpPost("Create")]
         public IActionResult Create(Patient model)
         {
             if (ModelState.IsValid)
             {
                 _context.Patients.Add(model);
                 _context.SaveChanges();
-                return RedirectToAction("GeneratePdf", "Pdf", new { id = model.Id });
+
+                // Return Patient ID so frontend can call GeneratePdf
+                return Json(new { success = true, patientId = model.Id });
             }
-            return View(model);
+
+            return BadRequest("Invalid patient data.");
         }
+
+
 
         // POST: /Patient/Create
         //[HttpPost]
@@ -139,7 +145,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         //    return View(model);
         //}
         // Fetch Surgeons by Treatment
-        [HttpGet]
+        [HttpGet("GetSurgeonsByTreatment")]
         public IActionResult GetSurgeonsByTreatment(int treatmentID)
         {
             var surgeons = _context.Surgeons
@@ -153,7 +159,7 @@ namespace SignatureClinicTreatmentPlanner.Controllers
         // Fetch Clinics by Surgeons
 
 
-        [HttpGet]
+        [HttpGet("GetClinicsBySurgeon")]
         public IActionResult GetClinicsBySurgeon(int surgeonID)  // Accept a single integer
         {
             if (surgeonID <= 0)

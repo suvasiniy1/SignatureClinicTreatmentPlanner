@@ -14,9 +14,10 @@
     <!-- Top Bar with Add User and Search -->
     <div class="row mb-3">
         <div class="col-md-6">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <button type="button" id="addNewUserBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
                 Add New User
             </button>
+
         </div>
         <div class="col-md-6 text-end">
             <input id="txtUserName" type="text" placeholder="Search..." class="form-control d-inline-block w-auto" />
@@ -33,6 +34,7 @@
                 <th>Last Name</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Phone Number</th>
                 <th>Active?</th>
                 <th>Actions</th>
             </tr>
@@ -45,7 +47,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add New User</h5>
+                <h5 class="modal-title">Add/Edit User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -70,11 +72,16 @@
                         <label>Email</label>
                         <input type="email" class="form-control" id="EmailID" required />
                     </div>
+                   
                     <div class="mb-3">
                         <label>Role</label>
                         <select class="form-select" id="RoleDropdown">
                             <option value="">Select a Role</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Phone Number</label>
+                        <input type="text" class="form-control" id="PhoneNumber" required />
                     </div>
                     <div class="mb-3">
                         <label>Status</label>
@@ -84,7 +91,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveUser()">Save User</button>
+                <button type="button" id="SaveUserBtn" class="btn btn-primary" onclick="saveUser()">Save User</button>
             </div>
         </div>
     </div>
@@ -94,21 +101,28 @@
     $(document).ready(function () {
           LoadUsers();
          LoadRoles();
-        $("#txtUserName").on("keyup", function () {
-            $("#tblUser").DataTable().search(this.value).draw();
+           $("#txtUserName").on("keyup", function () {
+        var table = $("#tblUser").DataTable();
+        table.search($(this).val()).draw();
         });
+
         $("#btnClear").click(function () {
             $("#txtUserName").val("");
             $("#tblUser").DataTable().search("").draw();
         });
-       
+        // Change entries per page dynamically
+        $("#entriesSelect").on("change", function () {
+            $("#tblUser").DataTable().page.len($(this).val()).draw();
+        });
+
     });
-        function LoadRoles() {
-        $.get("@Url.Action("GetRoles", "ManageUser")", function (response) {
+            function LoadRoles() {
+            $.get('@Href("~/ManageUser/GetRoles")', function (response) {
             if (response.success) {
                 $("#RoleDropdown").empty().append('<option value="">Select a Role</option>');
-                $.each(response.data, function (index, role) {
-                    $("#RoleDropdown").append(`<option value="${role.id}">${role.name}</option>`);
+
+                response.data.forEach(function (role) {
+                    $("#RoleDropdown").append(`<option value="${role.id}">${role.roleName}</option>`);
                 });
             } else {
                 console.error("Failed to load roles:", response.message);
@@ -116,130 +130,281 @@
         });
     }
 
-                function LoadUsers() {
+
+                           function LoadUsers() {
         if ($.fn.DataTable.isDataTable("#tblUser")) {
             $("#tblUser").DataTable().destroy();
         }
-        $("#tblUser").DataTable({
+
+        var table = $("#tblUser").DataTable({
             "ajax": {
-                "url": "@Url.Action("GetUsers", "ManageUser")",
+                "url": '@Href("~/ManageUser/GetUsers")',
                 "type": "GET",
                 "datatype": "json",
                 "dataSrc": "data"
             },
             "columns": [
-                { "data": "userName", "title": "User Name" },  // ✅ Lowercase to match API
+                { "data": "userName", "title": "User Name" },
                 { "data": "firstName", "title": "First Name" },
                 { "data": "lastName", "title": "Last Name" },
                 { "data": "email", "title": "Email" },
-                { "data": "roleName", "title": "Role Name" },
+                { "data": "phoneNumber", "title": "Phone Number" },
+                { "data": "roleName", "title": "Role" },
                 { "data": "isActive", "title": "Active?", "render": function (data) {
                     return data ? "Active" : "Inactive";
                 }},
                 {
-                         "data": "id", "render": function (data, type, row) {
-        console.log("Row Data:", row); // ✅ Debugging log
+                          "render": function (data, type, row) {
+        console.log("Row Data:", row); // ✅ Debugging row data
+
+        let userId = row.id || row.userID || row.UserId; // Ensure correct key
+
+        if (!userId) {
+            console.warn("⚠ Warning: Missing User ID in row!", row);
+            return `<span class="text-danger">Error: Missing ID</span>`;
+        }
+
         return `
-            <button class='btn btn-warning btn-sm' onclick='editUser(${row.id})'>Edit</button>
-            <button class='btn btn-danger btn-sm' onclick='deleteUser(${row.id})'>Delete</button>
+            <button class="btn btn-warning btn-sm editUser" data-id="${userId}">Edit</button>
+                    <button class="btn btn-danger btn-sm deactivateUser" data-id="${userId}">Deactivate</button>
         `;
     }
+
+
                 }
-            ]
-        });
-    }
-        function editUser(id) {
-        console.log("Editing User ID:", id);  // ✅ Debugging output
-
-        $.ajax({
-            url: "@Url.Action("GetUser", "ManageUser")",  // ✅ Fetch user details
-            type: "GET",
-            data: { id: id },  // ✅ Properly pass ID as a parameter
-            success: function (data) {
-                console.log("User Data:", data);  // ✅ Debugging output
-
-                if (!data || !data.Id) {
-                    alert("Error: User data not found.");
-                    return;
-                }
-
-                // ✅ Populate form fields with retrieved user data
-                $("#UserName").val(data.UserName);
-                $("#FirstName").val(data.FirstName);
-                $("#LastName").val(data.LastName);
-                $("#EmailID").val(data.Email);
-              //  $("#RoleDropdown").val(data.roleId);
-                $("#RoleDropdown").val(data.RoleName);
-                $("#IsActive").prop("checked", data.IsActive);
-                 // ✅ Load roles first, then set the selected role
-                LoadRoles(data.roleId);
-                $("#addUserModal").modal("show");  // ✅ Open modal
-            },
-            error: function () {
-                alert("Error fetching user details.");
+            ],
+            "dom": "<'row'<'col-sm-12'tr>>" +
+                   "<'row mt-3'<'col-md-6'l><'col-md-6'f>>" +
+                   "<'row'<'col-md-5'i><'col-md-7'p>>",
+            "paging": true,
+            "searching": true,
+            "lengthMenu": [5, 10, 25, 50],
+            "pageLength": 10,
+            "responsive": true,
+            "initComplete": function () {
+                $("#tblUser_filter").hide();
             }
         });
+
+           $("#tblUser tbody").on("click", ".editUser", function () {
+        var userId = $(this).attr("data-id"); // Ensure correct attribute
+        console.log("Editing User with ID:", userId);
+
+        if (!userId) {
+            alert("Error: User ID is undefined!");
+            return;
+        }
+
+        editUser(userId);
+      
+    });
+           // ✅ Fix event listener for delete button
+    $("#tblUser tbody").on("click", ".deactivateUser", function () {
+        var userId = $(this).attr("data-id"); // Get User ID
+        console.log("🚫 Deactivating User with ID:", userId);
+
+        if (!userId) {
+            alert("❌ Error: User ID is undefined!");
+            return;
+        }
+
+        confirmDeactivateUser(userId);
+    });
+
+        }
+   
+
+        function confirmDeactivateUser(id) {
+            $.post('@Href("~/ManageUser/DeactivateUser")', { id: id }, function (response) {
+            if (response.success) {
+                $("#deactivateUserModal").modal("hide"); // Close the modal
+                LoadUsers(); // Refresh the DataTable
+                alert("✅ User has been set to inactive.");
+            } else {
+                alert("❌ Error: " + response.message);
+            }
+        }).fail(function () {
+            alert("❌ Error: Failed to update user status.");
+        });
     }
 
 
-                function saveUser() {
+                  function saveUser() {
+        let userId = $("#SaveUserBtn").attr("data-id"); // Get user ID from button
+
         let userData = {
-            UserName: $("#UserName").val(),
-            PasswordHash: $("#Password").val(),  // ✅ Match C# property name
-            Email: $("#EmailID").val(),
+            Id: userId ? userId : null,  // If ID exists, it's an update
             FirstName: $("#FirstName").val(),
             LastName: $("#LastName").val(),
+            UserName: $("#UserName").val(),
+            PasswordHash: userId ? null : $("#Password").val(),  // Only send password if creating a new user
+            Email: $("#EmailID").val(),
             RoleId: $("#RoleDropdown").val(),
+            PhoneNumber: $("#PhoneNumber").val(),
             IsActive: $("#IsActive").is(":checked")
         };
 
-         $.post("@Url.Action("Create", "ManageUser")", userData, function (response) {
+        console.log("🚀 Sending User Data:", userData);
+
+        let url = userId ? '@Href("~/ManageUser/Update")' :'@Href("~/ManageUser/Create")'; // Decide API route
+        let successMessage = userId ? "User updated successfully!" : "User added successfully!";
+
+        $.post(url, userData, function (response) {
+            console.log("📩 Response Received:", response);
+
             if (response.success) {
                 $("#addUserModal").modal("hide");
-                LoadUsers();
-                alert("User added successfully!");
+                LoadUsers(); // Refresh user table
+                alert(successMessage);
             } else {
-                alert("Error: " + response.message);
+                if (response.errors && response.errors.length > 0) {
+                    alert("❌ Error: " + response.errors[0].Description);
+                } else {
+                    alert("❌ Error: " + response.message);
+                }
             }
+        }).fail(function () {
+            alert("❌ API Request Failed!");
         });
     }
 
 
-                       function LoadRoles() {
-        $.get("@Url.Action("GetRoles", "ManageUser")", function (response)
-        {
-            console.log("API Response:", response); // ✅ Debugging API response
+               function LoadRoles(selectedRoleId = null) {
+            $.get('@Href("~/ManageUser/GetRoles")', function (response) {
+            console.log("🎯 API Role Data:", response); // ✅ Debugging response
 
             if (response.success) {
                 $("#RoleDropdown").empty().append('<option value="">Select a Role</option>');
 
                 response.data.forEach(function (role, index) {
-                    console.log(`Role ${index}:`, role); // ✅ Log each role
-                    console.log("ID:", role.Id, "RoleName:", role.RoleName); // ✅ Check if properties exist
+                    console.log(`🔍 Role ${index}:`, role); // ✅ Debugging each role object
 
-                    $("#RoleDropdown").append(`<option value="${role.Id}">${role.RoleName}</option>`);
+                    // Ensure role object contains valid properties
+                    if (role.Id && role.RoleName) {  // ✅ Fixing incorrect key names
+                        $("#RoleDropdown").append(`<option value="${role.Id}">${role.RoleName}</option>`);
+                    } else {
+                        console.warn("⚠ Warning: Role Data Invalid", role); // ✅ Debugging bad data
+                    }
                 });
+
+                // ✅ Bind the selected role if available
+                if (selectedRoleId) {
+                    setTimeout(() => {
+                        $("#RoleDropdown").val(selectedRoleId).trigger("change");
+                    }, 200);
+                }
             } else {
-                console.error("Failed to load roles:", response.message);
+                console.error("❌ Failed to load roles:", response.message);
+            }
+        }).fail(function () {
+            console.error("❌ API Request Failed: Unable to fetch roles!");
+        });
+    }
+
+         $("#addNewUserBtn").click(function () {
+    console.log("🔄 Opening Add User Modal - Resetting Fields");
+
+    $("#userForm")[0].reset();  // ✅ Reset form fields
+    $("#RoleDropdown").prop("disabled", false).val(""); // ✅ Enable & Reset role selection
+    $("#Password").prop("disabled", false).val(""); // ✅ Enable & Clear password
+    $("#IsActive").prop("checked", true); // ✅ Default status to active
+         $("#SaveUserBtn").text("Save User").removeAttr("data-id");
+        LoadRoles(); // ✅ Ensure roles are loaded
+    $("#addUserModal").modal("show"); // ✅ Open modal
+});
+
+
+    //       // Reset the modal when opening for a new user
+    // $("#addUserModal").on("show.bs.modal", function (event) {
+    //     var button = $(event.relatedTarget); // Get the button that triggered the modal
+    //     var isEdit = button.hasClass("editUser"); // Check if it's an edit action
+
+    //     if (!isEdit) {
+    //         console.log("🔄 Resetting Modal for New User");
+
+    //         // Reset form fields
+    //         $("#userForm")[0].reset();
+    //         $("#RoleDropdown").val("").trigger("change");
+    //         $("#Password").prop("disabled", false); // Enable password field for new users
+    //         $("#Password").val(""); // Clear password field
+
+    //         // Change button text and function
+    //         $(".btn-primary").text("Add New User").attr("onclick", "saveUser()");
+    //     }
+    // });
+
+
+
+                           function editUser(id) {
+        console.log("📌 Editing User with ID:", id);
+
+        // Clear previous user data before opening modal
+        $("#userForm")[0].reset();
+
+        $.get('@Href("~/ManageUser/GetUser/")'+id, function (user) {
+            if (!user || user.success === false) {
+                alert("⚠ Error: User data not found!");
+                return;
+            }
+
+            console.log("🎯 User Data Loaded:", user);
+
+            // ✅ Populate the modal with user data
+            $("#FirstName").val(user.FirstName || "");
+            $("#LastName").val(user.LastName || "");
+            $("#UserName").val(user.UserName || "");
+            $("#EmailID").val(user.Email || "");
+            $("#PhoneNumber").val(user.PhoneNumber || "");
+            $("#IsActive").prop("checked", user.IsActive);
+
+            // ✅ Disable Password field for security
+            $("#Password").prop("disabled", true).val("********");
+
+            // ✅ Load and Bind Roles
+            LoadRoles(user.RoleId);
+                $("#addUserModalLabel").text("Update User");
+           // $("#SaveUserBtn").text("Update User");
+                $("#SaveUserBtn").text("Update User").attr("data-id", id); // Store ID
+            // ✅ Show the modal
+            $("#addUserModal").modal("show");
+
+            // ✅ Change button to "Update User"
+           // $(".btn-primary").text("Update User").attr("onclick", `updateUser(${id})`);
+        }).fail(function () {
+            alert("⚠ Error: Failed to load user data!");
+        });
+    }
+
+
+
+
+
+            function updateUser(id) {
+        let userData = {
+            Id: id,
+            FirstName: $("#FirstName").val(),
+            LastName: $("#LastName").val(),
+            UserName: $("#UserName").val(),
+            Email: $("#EmailID").val(),
+            PhoneNumber: $("#PhoneNumber").val(),
+            RoleId: $("#RoleDropdown").val(),
+            IsActive: $("#IsActive").is(":checked")
+        };
+
+        console.log("🚀 Updating User Data:", userData);
+
+            $.post('@Href("~/ManageUser/Update")', userData, function (response) {
+            if (response.success) {
+                $("#addUserModal").modal("hide");
+                LoadUsers();
+                alert("✅ User updated successfully!");
+            } else {
+                alert("❌ Error: " + response.message);
             }
         });
     }
 
-        // Call LoadRoles when modal opens
-    $('#addUserModal').on('show.bs.modal', function () {
-        LoadRoles();
-    });
-    function deleteUser(id) {
-        if (confirm("Are you sure you want to delete this user?")) {
-            $.post("@Url.Action("Delete", "ManageUser")", { id: id }, function (response) {
-                if (response.success) {
-                    LoadUsers();
-                    alert("User deleted successfully!");
-                } else {
-                    alert("Error: " + response.message);
-                }
-            });
-        }
-    }
+
+
 </script>
 

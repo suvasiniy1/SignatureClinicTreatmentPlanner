@@ -46,7 +46,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler("/Home/Error"); // Log detailed errors
     app.UseHsts();
 }
 
